@@ -1,0 +1,9 @@
+tensorflow-macos
+pandas
+numpy
+matplotlib
+scikit-earn
+seaborn
+stable-baselines3
+gymnasium
+streamlit
