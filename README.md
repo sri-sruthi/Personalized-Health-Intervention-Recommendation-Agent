@@ -235,8 +235,8 @@ See the `LICENSE` file for details.
 
 Sri Sruthi Manikka Nagasamy  
 Integrated MSc Data Science  
-Reinforcement Learning and Predictive Modeling  
-Personalized Health Intervention Research Project
+Personalized Health Intervention Recommendation Agent Project
+Amrita Vishwa Vidyapeetham Coimbatore
 
 ---
 
