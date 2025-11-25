@@ -3,7 +3,7 @@
 
 ## 1. Introduction
 
-This repository contains the implementation of a personalized health intervention system designed to generate user-specific recommendations based on wearable sensor data. The system integrates sequence modeling (LSTM), reinforcement learning (PPO, SAC), and a hybrid decision-making mechanism to provide context-aware behavioural interventions that aim to improve key health indicators such as sleep efficiency, activity levels, and daily movement patterns.
+This repository implements a personalized health intervention system designed to generate user-specific recommendations based on wearable sensor data. The system integrates sequence modeling (LSTM), reinforcement learning (PPO and SAC), and a hybrid decision-making mechanism to provide context-aware behavioural interventions aimed at improving key health indicators such as sleep efficiency, activity levels, and daily movement patterns.
 
 The project includes a modular codebase, a custom Gymnasium environment, reproducible training pipelines, and an interactive Streamlit interface for demonstration and evaluation.
 
@@ -11,46 +11,46 @@ The project includes a modular codebase, a custom Gymnasium environment, reprodu
 
 ## 2. Key Capabilities
 
-### 2.1 Predictive Modelling
-A Long Short-Term Memory (LSTM) neural network predicts next-day sleep efficiency using a seven-day window of engineered health features. The model incorporates:
-- Multi-feature input sequences  
+### 2.1 Predictive Modelling  
+A Long Short-Term Memory (LSTM) neural network predicts next-day sleep efficiency using a seven-day window of engineered health features. The model incorporates:  
+- Multivariate feature sequences  
 - Batch normalization and dropout  
-- Early stopping and learning-rate scheduling  
-- High-performance training configurations  
+- Early stopping and learning rate scheduling  
+- A production-ready training configuration  
 
-### 2.2 Reinforcement Learning Agents
+### 2.2 Reinforcement Learning Agents  
 The system trains and evaluates three RL approaches:
 
 #### PPO (Proximal Policy Optimization)
-- Discrete action space (four health interventions)  
-- Stable and sample-efficient  
+- Discrete action space consisting of four intervention categories  
+- Stable policy-gradient optimization  
 - Suitable for categorical behavioural recommendations  
 
 #### SAC (Soft Actor-Critic)
-- Continuous action space (intervention intensities)  
-- Entropy-regularized objective  
-- Captures fine-grained behavioural adjustments  
+- Continuous action space representing intervention intensities  
+- Entropy-regularized objective for exploration stability  
+- Suited for fine-grained behavioural adjustments  
 
 #### Hybrid PPO + SAC Model
-- A gating network selects either PPO or SAC per state  
-- Short rollouts compute agent-specific performance  
-- Produces a unified and adaptive policy  
+- A gating mechanism selects between PPO and SAC policies dynamically  
+- Short rollouts evaluate which agent performs better per state  
+- Produces an adaptive and robust unified policy  
 
-### 2.3 Custom Health Environment
-The project includes a custom Gymnasium environment that models:
-- Daily steps, active minutes, sedentary time  
-- Sleep efficiency and deep-sleep ratio  
-- Heart-rate variability, HR mean, HR standard deviation  
-- Rolling features such as consistency and sleep debt  
-- Reward shaping based on improvement across metrics  
+### 2.3 Custom Health Environment  
+A purpose-built Gymnasium environment captures:  
+- Step count, active minutes, sedentary behaviour  
+- Sleep efficiency and deep sleep ratios  
+- Heart-rate statistics and variability  
+- Rolling-window features such as step consistency and sleep debt  
+- Reward shaping based on metric improvements and behavioural expectations  
 
-### 2.4 Interactive Dashboard
-A Streamlit dashboard enables:
+### 2.4 Interactive Dashboard  
+A Streamlit dashboard provides:  
 - Data loading and preprocessing  
-- LSTM model training and evaluation  
+- LSTM model training and inspection  
 - PPO, SAC, and Hybrid RL training  
-- Performance comparison  
-- Real-time intervention recommendations  
+- Algorithm performance comparison  
+- Real-time intervention recommendation  
 
 ---
 
@@ -119,91 +119,108 @@ pip install -r requirements.txt
 
 ## 5. Usage
 
-### 5.1 Launch the Streamlit Dashboard
+### 5.1 Launch the Streamlit Dashboard (Recommended)
 ```bash
 streamlit run app/production_ui.py
 ```
+This interface supports data processing, model training, algorithm comparison, and real-time intervention recommendations.
 
-This interface supports model training, algorithm comparison, and interactive demonstration of recommendations.
+---
 
-### 5.2 Train the LSTM Model
+### 5.2 Train the LSTM Model (Programmatic Usage)
 ```python
-from training.train_lstm import train_lstm
-train_lstm()
+from training.train_lstm import ProductionSleepPredictor
+
+predictor = ProductionSleepPredictor()
+predictor.train_production(epochs=100)
 ```
+
+---
 
 ### 5.3 Train PPO and SAC Agents
 ```python
-from training.train_rl import train_ppo, train_sac
+from training.train_rl import FastRLTrainer
 
-ppo_model = train_ppo()
-sac_model = train_sac()
+trainer = FastRLTrainer()
+
+ppo_model, ppo_env = trainer.train_ppo_agent()
+sac_model, sac_env = trainer.train_sac_agent()
 ```
 
-### 5.4 Train the Hybrid RL Agent
+---
+
+### 5.4 Train the Hybrid Reinforcement Learning Agent
 ```python
-from training.compare_algorithms import build_hybrid
-gating_network = build_hybrid()
+from training.train_rl import HybridAgent, FastRLTrainer
+
+trainer = FastRLTrainer()
+
+hybrid_agent = HybridAgent(
+    ppo_path="models/ppo_health_agent",
+    sac_path="models/sac_health_agent",
+    env=trainer.env
+)
 ```
+
+---
 
 ### 5.5 Evaluate All Agents
 ```python
-from training.compare_algorithms import evaluate_all
+from training.compare_algorithms import AlgorithmComparator
 
-results = evaluate_all()
-print(results)
+comparator = AlgorithmComparator()
+results = comparator.run_comparison(num_episodes=50)
+comparator.plot_comparison(results)
 ```
 
 ---
 
 ## 6. Engineered Features
 
-The system uses a rich set of input features:
+The system constructs a comprehensive health-feature vector including:
 
 - Total daily steps  
 - Total active minutes  
 - Sedentary minutes  
-- Activity-to-sedentary ratio  
-- Step consistency (rolling 7-day standard deviation)  
+- Activity–sedentary ratio  
+- Rolling seven-day step consistency  
 - Sleep efficiency  
 - Deep sleep ratio  
-- Heart rate mean, standard deviation, and variability  
-- Synthetic sleep-debt signal  
-- Additional derived physiological metrics  
+- Heart-rate mean, standard deviation, and variability  
+- Synthetic sleep-debt estimate  
+- Additional physiological and behavioural metrics  
 
-These features are normalized and prepared through a dedicated preprocessing pipeline.
+All features undergo normalization and preprocessing through a modular pipeline.
 
 ---
 
 ## 7. Reinforcement Learning Formulation
 
-### 7.1 PPO Agent
-- Action space: 4 discrete intervention strategies  
-- Policy: MLP with shared encoder  
-- Advantage estimation via GAE  
-- Optimized for behavioural decision boundaries  
+### 7.1 PPO  
+- Discrete action space representing four intervention types  
+- Generalized Advantage Estimation (GAE)  
+- MLP-based policy with shared latent layers  
 
-### 7.2 SAC Agent
-- Action space: continuous intervention intensities  
-- Actor-critic architecture with entropy regularization  
-- Suitable for fine-grained behaviour scaling  
+### 7.2 SAC  
+- Continuous action space for intervention intensities  
+- Entropy regularization for stable exploration  
+- Actor–critic architecture with soft updates  
 
-### 7.3 Hybrid Model
-- Learns a meta-policy that selects PPO or SAC  
-- Combines discrete decision-making with continuous control  
-- Demonstrates improved policy robustness  
+### 7.3 Hybrid PPO + SAC  
+- Combines discrete and continuous control  
+- Gating network selects the more effective agent per state  
+- Improves policy robustness across heterogeneous health states  
 
 ---
 
 ## 8. Results Summary
 
-Multiple experiments demonstrate that:
+Experimental evaluations show:
 
-- PPO performs well for clear-cut decisions  
-- SAC outperforms PPO when continuous adjustments are beneficial  
-- The hybrid model yields the highest mean reward and stability across evaluation episodes  
-
-These findings align with expected trade-offs between discrete and continuous RL methods.
+- PPO performs reliably for discrete behavioural choices  
+- SAC excels when fine-grained intervention intensity matters  
+- The hybrid model achieves the highest mean reward and stability  
+- Overall, the hybrid agent produces the most personalized and context-aware recommendations  
 
 ---
 
@@ -225,16 +242,15 @@ Personalized Health Intervention Research Project
 
 ## 11. Learning Outcomes
 
-Through the development of this system, the following technical competencies were demonstrated:
+The development of this system demonstrates the following competencies:
 
-- Ability to design and train deep learning models (LSTM) for multivariate time-series forecasting.
-- Construction of a custom Gymnasium reinforcement learning environment modeled on real-world health metrics.
-- Implementation and training of advanced RL algorithms including PPO (discrete control) and SAC (continuous control).
-- Development of a hybrid policy-selection mechanism combining discrete and continuous RL for improved decision-making.
-- Expertise in reward shaping, feature engineering, and trajectory evaluation for behavioural RL tasks.
-- Integration of predictive modelling and reinforcement learning into a unified pipeline for personalized recommendations.
-- Deployment of an interactive Streamlit interface for model demonstration and live recommendation generation.
-- Experience structuring a research-grade machine learning codebase with modular components.
-- Proficiency in data preprocessing techniques for wearable sensor datasets.
-- Ability to compare algorithmic performance using standardized evaluation episodes, metrics, and visualization.
-  
+- Designing and training LSTM models for multivariate time-series forecasting  
+- Building a custom Gymnasium reinforcement learning environment for wearable-data simulation  
+- Implementing PPO (discrete control) and SAC (continuous control) using Stable-Baselines3  
+- Developing a hybrid RL mechanism that combines discrete and continuous action policies  
+- Reward shaping, trajectory evaluation, and RL performance analysis  
+- Integrating predictive modelling and reinforcement learning into a unified personalized recommendation workflow  
+- Constructing a modular, research-grade codebase structured for maintainability  
+- Implementing an interactive Streamlit interface for experimentation and demonstration  
+- Executing robust preprocessing pipelines for wearable sensor datasets  
+- Performing comparative evaluation of RL algorithms using standardized metrics and visualizations
